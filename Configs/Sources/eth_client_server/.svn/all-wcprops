@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/rysca/!svn/ver/5/Sources/eth_client_server
+END
+eth_client.c
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/rysca/!svn/ver/5/Sources/eth_client_server/eth_client.c
+END
+LEEME.TXT
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/rysca/!svn/ver/5/Sources/eth_client_server/LEEME.TXT
+END
+eth_server.c
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/rysca/!svn/ver/5/Sources/eth_client_server/eth_server.c
+END

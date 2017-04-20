@@ -1,0 +1,51 @@
+Requisitos:
+
+**Pendiente**
+
+Mejoras OPCIONALES del proyecto
+
+Leyenda de estados: 
+[PENDIENTE] Sin empezar, sin asignar a nadie.
+[ASIGNADOS] Asignado a una persona, responsable del desarrollo, las pruebas y la implementacion.
+[ENPRUEBAS] En fase de pruebas para la implementacion con la version final/minima del proyecto.
+[TERMINADO] Correctamente implementado y completado.
+
+Tabla de tareas:
+[ESTADOS] - [ASIGNADO] - [DESCRIPCION]
+
+[PENDIENTE] - [NADIE] - Añadir bytes de relleno en tramas Ethernet inferiores al tamaño mínimo.
+
+[PENDIENTE] - [NADIE] - Caché ARP: - Múltiples entradas.
+[PENDIENTE] 	      - Temporizador para sobrescribir las entradas menos utilizadas.
+[PENDIENTE] -         - Consultas ARP en unicast.
+
+[PENDIENTE] - [NADIE] - Servidor ARP: - Interacción con la cache ARP.
+
+[PENDIENTE] - [NADIE] - Implementar el checksum de UDP.
+
+[PENDIENTE] - [NADIE] - Comprobación de los checksums de IP y/o UDP (incluyendo la generación aleatoria de errores para probar dicha funcionalidad).
+
+[PENDIENTE] - [NADIE] - Emplear un puerto UDP aleatorio para los clientes, pero que los servidores lo puedan elegir explícitamente.
+
+ RIP:
+[PENDIENTE] - [NADIE] - Implementación de los dos tipos de operación RIP Request, permitiendo solicitar cualquier número (>25) de rutas individuales.
+
+[PENDIENTE] - [NADIE] - Envío de mensajes RIP Request broadcast/broadcast de subred/multicast para solicitar la tabla de rutas al iniciar el servidor
+[PENDIENTE] -			- Mapeo de direcciones IP broadcast en direcciones MAC broadcast.
+[PENDIENTE] -			- Mapeo de direcciones IP multicast en direcciones MAC multicast.
+
+[PENDIENTE] - [NADIE] - Sincronizar la tabla de rutas de RIP con la tabla de reenvío IP:
+[PENDIENTE] -			- Obtener rutas directamente conectadas de la tabla de IP (configurable).
+[PENDIENTE] -			- Obtener rutas estáticas de la tabla de IP (configurable).
+[PENDIENTE] -			- Añadir el concepto de distancia administrativa en IP.
+
+[PENDIENTE] - [NADIE] - Envío periódico de mensajes RIP Response broadcast/broadcast de subred/multicast con la tabla de rutas actualizada:
+[PENDIENTE] -			- Añadir jitter aleatorio al envío periódico de RIP Responses.
+[PENDIENTE] -			- Implementar el temporizador de garbage-collection.
+[PENDIENTE] -			- Implementar la técnica de split horizon.
+[PENDIENTE] -			- Implementar la técnica de poison reverse.
+[PENDIENTE] -			- Implementar la técnica de triggered updates.
+
+[PENDIENTE] - [NADIE] - Permitir tablas de rutas RIP con más de 25 entradas.
+
+

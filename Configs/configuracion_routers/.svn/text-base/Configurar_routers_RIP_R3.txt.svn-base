@@ -1,0 +1,16 @@
+telnet 192.168.0.1
+conf ter
+no ip route 10.0.21.128/26 eth0.3	
+no ip route 10.0.21.192/27 eth0.4
+no ip route 10.0.21.64/26 eth0.1
+no ip route 10.0.0.0/16 eth0.2
+no ip route 10.0.21.4/30 eth0.3
+router rip
+network eth0.4
+network eth0.2
+network eth0.3
+network eth0.1
+passive-interface eth0.1
+exit
+exit
+exit

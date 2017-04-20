@@ -1,0 +1,59 @@
+#include "arp.h"
+#include "ipv4.h"
+#include <stdlib.h>
+
+/* ARP frame header structure */
+struct arp_frame
+{
+	unsigned short hrd_type;
+	unsigned short prot_type;
+	unsigned char hrd_len;
+	unsigned char prot_len;
+	unsigned short opcode;
+	mac_addr_t mac_src;
+	ipv4_addr_t ip_src;
+	mac_addr_t mac_dst;
+	ipv4_addr_t ip_dst;
+	
+};
+
+int arp_resolve (eth_iface_t* iface, ipv4_addr_t dest, mac_addr_t mac)
+{
+
+	/* Create ARP request header */
+	struct arp_frame req;
+	req.hrd_type = 0x0001;				// Ethernet
+	req.prot_type = 0x0800;				// IP
+	req.hrd_len = 6;					// MAC address length (bytes)
+	req.prot_len = 4;					// IP address length (bytes)
+	req.opcode = REQUEST;				// ARP request
+	
+	eth_getaddr (iface, req.mac_src);	//eth iface address
+
+	ipv4_str_addr("0.0.0.0", req.ip_src);// Source IP address
+	mac_str_addr((char *)MAC_BCAST_ADDR, req.mac_dst);// MAC broadcast
+	req.ip_dst = dest;					// Destination IP address
+
+	/* Send ARP request */
+	eth_send (iface,req.mac_dst, ARP_TYPE, (unsigned char *)&req, ARP_LEN);
+
+	/* Wait for answer */
+	struct arp_frame rep;
+	unsigned char found = 0;
+	do
+	{		
+		if (eth_recv (iface, req.mac_src, ARP_TYPE, (unsigned char *)&rep, -1) == 28)
+		{
+			if ((rep.opcode == REPLY) && (rep.ip_src == req.ip_dst))
+			{
+				memcpy(&mac, &rep.mac_src, MAC_ADDR_SIZE);
+				found = 1;
+			}
+		}
+	}
+	while (!found);
+
+	return found;
+}
+
+

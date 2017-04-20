@@ -1,0 +1,19 @@
+telnet 192.168.0.1
+conf ter
+interface eth0.1
+ip addr 10.0.21.193/27
+exit
+interface eth0.2
+ip addr 10.0.21.6/30
+exit
+interface eth0.3
+ip addr 10.0.21.9/30
+exit
+
+ip route 10.0.21.128/26 eth0.2
+ip route 10.0.21.192/27 eth0.1
+ip route 10.0.0.0/16 eth0.3
+ip route 10.0.21.0/30 eth0.2
+exit
+exit
+exit

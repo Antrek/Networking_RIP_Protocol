@@ -1,0 +1,29 @@
+#include "Lista_enlazada.h"
+
+/**Función********************************************************************
+
+  Resumen      Devuelve el siguiente nodo de la lista enlazada.
+
+  Parámetros   struct nodo *nodo
+
+  Efec. Colat. Ninguno
+
+******************************************************************************/
+void* get_next_node(node * nodo)
+{
+    return nodo->next;
+}
+
+/**Función********************************************************************
+
+  Resumen      Devuelve la información contenida en el nodo.
+
+  Parámetros   struct nodo *nodo  
+
+  Efec. Colat. Ninguno
+
+******************************************************************************/
+void* get_data(node * nodo)
+{
+    return nodo->data;
+}

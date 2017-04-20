@@ -1,0 +1,7 @@
+clear;clear;clear;
+set +v
+echo "========== Compilando prueba =========="
+cd source/
+rawnetcc prueba prueba.c rip.c rip_route_table.c udp.c ipv4.c eth.c ipv4_route_table.c ipv4_config.c arp.c
+mv prueba ../bins/prueba
+cd ..

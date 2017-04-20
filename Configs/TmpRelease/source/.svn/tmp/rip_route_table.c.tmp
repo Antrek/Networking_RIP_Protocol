@@ -1,0 +1,588 @@
+#include "rip_route_table.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
+/* rip_route_t * rip_route_create
+ * ( ipv4_addr_t subnet, ipv4_addr_t mask, char* iface, ipv4_addr_t gw );
+ * 
+ * DESCRIPCIÓN: 
+ *   Esta función crea una ruta RIP con los parámetros especificados:
+ *   dirección de subred, máscara, nombre de interfaz y dirección de siguiente
+ *   salto.
+ *
+ *   Esta función reserva memoria para la estructura creada. Debe utilizar la
+ *   función 'rip_route_free()' para liberar dicha memoria.
+ *
+ * PARÁMETROS:
+ *   'subnet': Dirección RIP de la subred destino de la nueva ruta.
+ *     'mask': Máscara de la subred destino de la nueva ruta.
+ *    'iface': Nombre del interfaz empleado para llegar a la subred destino de
+ *             la nueva  ruta.
+ *             Debe tener una longitud máxima de 'IFACE_NAME_LENGTH' caracteres.
+ *       'gw': Dirección RIP del encaminador empleado para llegar a la subred
+ *             destino de la nueva ruta.
+ *
+ * VALOR DEVUELTO:
+ *   La función devuelve un puntero a la ruta creada.
+ * 
+ * ERRORES:
+ *   La función devuelve 'NULL' si no ha sido posible reservar memoria para
+ *   crear la ruta.
+ */
+/*rip_route_t * rip_route_create
+( ipv4_addr_t subnet, ipv4_addr_t mask, ipv4_addr_t next_hop, uint32_t metric)
+{
+	rip_route_t * route = (rip_route_t *) malloc(sizeof(struct rip_entry));
+
+  if (route != NULL) {
+	  route->famid = FAM_ID_IP;
+	route->route_tag = ROUTE_TAG;
+    memcpy(route->ip_addr, subnet, IPv4_ADDR_SIZE);
+    memcpy(route->mask, mask, IPv4_ADDR_SIZE);
+    memcpy(route->next_hop, next_hop, IPv4_ADDR_SIZE);
+	route->metric = metric;
+  }
+  
+  return route;
+}*/
+
+
+/* int rip_route_lookup ( rip_route_t * route, ipv4_addr_t addr );
+ *
+ * DESCRIPCIÓN:
+ *   Esta función indica si la dirección RIP especificada pertence a la
+ *   subred indicada. En ese caso devuelve la longitud de la máscara de la
+ *   subred.
+ *
+ *   Esta función NO está implementada, debe implementarla usted para que
+ *   funcione correctamente la función 'rip_route_table_lookup()'.
+ * 
+ * PARÁMETROS:
+ *   'route': Ruta a la subred que se quiere comprobar.
+ *    'addr': Dirección RIP destino.
+ *
+ * VALOR DEVUELTO:
+ *   Si la dirección IP pertenece a la subred de la ruta especificada, debe
+ *   devolver un número positivo que indica la longitud del prefijo de
+ *   subred. Esto es, el número de bits a uno de la máscara de subred.
+ *   La función devuelve '-1' si la dirección IP no pertenece a la subred
+ *   apuntada por la ruta especificada.
+ */
+int rip_route_lookup ( rip_route_t * route, ipv4_addr_t addr )
+{
+	int prefix_length = -1;
+	
+	uint32_t ip = ipv4_addr_bin(addr);
+	uint32_t netmask = ipv4_addr_bin(route->mask);
+	uint32_t prefix = ipv4_addr_bin(route->ip_addr);
+	
+	ip = netmask&ip;
+	prefix = netmask&prefix;
+	
+	if ((ip^prefix) == 0)
+	{
+		int i = 31;
+		while ((netmask&(1 << i)) != 0) i--;
+		
+		prefix_length = 32 - (i + 1);
+	}
+
+	return prefix_length;
+}
+
+
+/* void rip_route_print ( rip_route_t * route );
+ *
+ * DESCRIPCIÓN:
+ *   Esta función imprime la ruta especificada por la salida estándar.
+ *
+ * PARÁMETROS:
+ *   'route': Ruta que se desea imprimir.
+ */
+void rip_route_print ( rip_route_t * route )
+{
+//   if (route != NULL) {
+//     char subnet_str[RIP_ADDR_STR_LENGTH];
+//     ipv4_addr_str(route->subnet_addr, subnet_str);
+//     char mask_str[RIP_ADDR_STR_LENGTH];
+//     ipv4_addr_str(route->subnet_mask, mask_str);
+//     char* iface_str = route->iface;
+//     char gw_str[RIP_ADDR_STR_LENGTH];
+//     ipv4_addr_str(route->gateway_addr, gw_str);
+// 
+//     printf("%s/%s -> %s/%s", subnet_str, mask_str, iface_str, gw_str);
+//   }
+}
+
+
+/* void rip_route_free ( rip_route_t * route );
+ *
+ * DESCRIPCIÓN:
+ *   Esta función libera la memoria reservada para la ruta especificada, que
+ *   ha sido creada con 'rip_route_create()'.
+ *
+ * PARÁMETROS:
+ *   'route': Ruta que se desea liberar.
+ */
+void rip_route_free ( rip_route_t * route )
+{
+  if (route != NULL) {
+    free(route);
+  }
+}
+
+
+/* rip_route_table_t * rip_route_table_create();
+ * 
+ * DESCRIPCIÓN: 
+ *   Esta función crea una tabla de rutas RIP vacía.
+ *
+ *   Esta función reserva memoria para la tabla de rutas creada, para
+ *   liberarla es necesario llamar a la función 'rip_route_table_free()'.
+ *
+ * VALOR DEVUELTO:
+ *   La función devuelve un puntero a la tabla de rutas creada.
+ *
+ * ERRORES:
+ *   La función devuelve 'NULL' si no ha sido posible reservar memoria para
+ *   crear la tabla de rutas.
+ */
+rip_route_table_t * rip_route_table_create()
+{
+  rip_route_table_t * table;
+
+  table = (rip_route_table_t *) malloc(sizeof(struct rip_route_node));
+  if (table != NULL) {
+	table->data = NULL;
+    table->next = NULL;
+  }
+
+  return table;
+}
+
+
+/* int rip_route_table_add ( rip_route_table_t * table, 
+ *                            rip_route_t * route );
+ * DESCRIPCIÓN: 
+ *   Esta función añade la ruta especificada en la primera posición libre de
+ *   la tabla de rutas.
+ *
+ * PARÁMETROS:
+ *   'table': Tabla donde añadir la ruta especificada.
+ *   'route': Ruta a añadir en la tabla de rutas.
+ * 
+ * VALOR DEVUELTO:
+ *   La función devuelve la nueva tabla.
+ * 
+ * ERRORES:
+ *   La función devuelve null si no ha sido posible añadir la ruta
+ *   especificada.
+ */
+rip_route_table_t *rip_route_table_add ( rip_route_table_t * table, rip_route_t * route )
+{
+	rip_route_table_t *new_table = NULL;
+	
+	if((route->metric < 0)  || (route->metric > 16))
+				//&&
+				//(route->ip_addr[0] > 0 && route->ip_addr[0] < 255)&&
+				//(route->ip_addr[1] > 0 && route->ip_addr[1] < 255)&&
+				//(route->ip_addr[2] > 0 && route->ip_addr[2] < 255)&&
+				//(route->ip_addr[3] > 0 && route->ip_addr[3] < 255))
+	{
+		return table;
+	}
+	
+  if (table != NULL) {
+   
+	route_node *node = (route_node *)malloc(sizeof(route_node));
+	
+	if (node != NULL)
+	{
+		node->data = (route_data *)malloc(sizeof(route_data));
+		
+		if (node->data != NULL)
+		{
+			
+				memcpy(&(node->data->route), route, sizeof(rip_route_t));
+				node->next = table;
+				new_table = node;
+				timerms_reset(&(node->data->timer), 180000);
+			
+		}
+		
+	}
+
+  }
+
+  return new_table;
+}
+
+
+/* rip_route_t * rip_route_table_remove ( rip_route_table_t * table, 
+ *                                          int index );
+ *
+ * DESCRIPCIÓN:
+ *   Esta función borra la ruta almacenada en la posición de la tabla de rutas
+ *   especificada.
+ *   
+ *   Esta función NO libera la memoria reservada para la ruta borrada. Para
+ *   ello es necesario utilizar la función 'rip_route_free()' con la ruta
+ *   devuelta.
+ *
+ * PARÁMETROS:
+ *   'table': Tabla de rutas de la que se desea borrar una ruta.
+ *   'index': Índice de la ruta a borrar. Debe tener un valor comprendido
+ *            entre [0, RIP_ROUTE_TABLE_SIZE-1].
+ * 
+ * VALOR DEVUELTO:
+ *   Esta función devuelve la ruta que estaba almacenada en la posición
+ *   indicada.
+ *
+ * ERRORES:
+ *   Esta función devuelve 'NULL' si la ruta no ha podido ser borrada, o no
+ *   existía ninguna ruta en dicha posición.
+ */
+rip_route_table_t * rip_route_table_remove ( rip_route_table_t * table, rip_route_t *route )
+{
+  //rip_route_t * removed_route = NULL;
+  rip_route_table_t *aux_table = table;
+  
+  if (table != NULL && memcmp(&(table->data->route), route, sizeof(rip_route_t)) == 0)
+  {
+	aux_table = table->next;
+	rip_route_node_free(table);
+	return aux_table;
+  }
+
+  while (table->next != NULL) {
+	  		
+	if (table->next->data == NULL) puts("Aca esta!");
+    if (memcmp(&(table->next->data->route), route, sizeof(rip_route_t)) == 0)
+	{
+		puts("tu puta madre");
+		route_node *aux = table->next;
+		table->next = table->next->next;
+		rip_route_node_free(aux);	
+		
+		return aux_table;
+	}
+	
+	table = table->next;
+  }
+
+  return aux_table;
+}
+
+
+/* rip_route_t * rip_route_table_get ( rip_route_table_t * table, int index );
+ * 
+ * DESCRIPCIÓN:
+ *   Esta función devuelve la ruta almacenada en la posición de la tabla de
+ *   rutas especificada.
+ *
+ * PARÁMETROS:
+ *   'table': Tabla de rutas de la que se desea obtener una ruta.
+ *   'index': Índice de la ruta consultada. Debe tener un valor comprendido
+ *            entre [0, RIP_ROUTE_TABLE_SIZE-1].
+ * 
+ * VALOR DEVUELTO:
+ *   Esta función devuelve la ruta almacenada en la posición de la tabla de
+ *   rutas indicada.
+ *
+ * ERRORES:
+ *   Esta función devuelve 'NULL' si no ha sido posible consultar la tabla de
+ *   rutas, o no existe ninguna ruta en dicha posición.
+ */
+route_data * rip_route_table_get ( rip_route_table_t * table, int index )
+{
+  if(index < 0 || index > rip_route_table_size(table) )
+    return NULL;
+  route_data * data = NULL;
+
+  if ((table != NULL) && (index >= 0))
+  {
+	while (index != 0)
+	{
+		table = table->next;
+		index--;
+	}
+    data = table->data;
+  }
+  
+  return data;
+}
+
+
+/* int rip_route_table_find ( rip_route_table_t * table, ipv4_addr_t subnet, 
+ *                                                         ipv4_addr_t mask );
+ *
+ * DESCRIPCIÓN:
+ *   Esta función devuelve el índice de la ruta para llegar a la subred
+ *   especificada.
+ *
+ * PARÁMETROS:
+ *    'table': Tabla de rutas en la que buscar la subred.
+ *   'subnet': Dirección de la subred a buscar.
+ *     'mask': Máscara de la subred a buscar.
+ * 
+ * VALOR DEVUELTO:
+ *   Esta función devuelve la posición de la tabla de rutas donde se encuentra
+ *   la ruta que apunta a la subred especificada.
+ *
+ * ERRORES:
+ *   La función devuelve '-1' si no se ha encontrado la ruta especificada o
+ *   '-2' si no ha sido posible realizar la búsqueda.
+ */
+int rip_route_table_find
+( rip_route_table_t * table, ipv4_addr_t subnet, ipv4_addr_t mask )
+{
+
+    int route_index = -1;
+    int i = 0;
+    while (table != NULL)
+	{
+      rip_route_t * route_i = &(table->data->route);
+      if (route_i != NULL)
+	  {
+        int same_subnet = 
+        (memcmp(route_i->ip_addr, subnet, IPv4_ADDR_SIZE) == 0);
+		
+        int same_mask = (memcmp(route_i->mask, mask, IPv4_ADDR_SIZE) == 0);
+
+        if (same_subnet && same_mask)
+		{
+          route_index = i;
+          break;
+        }
+      }
+
+      table = table->next;
+	  i++;
+    }
+
+	return route_index;
+}
+
+
+/* rip_route_t * rip_route_table_lookup ( rip_route_table_t * table, 
+ *                                          ipv4_addr_t addr );
+ * 
+ * DESCRIPCIÓN:
+ *   Esta función devuelve la mejor ruta almacenada en la tabla de rutas para
+ *   alcanzar la dirección RIP destino especificada.
+ *
+ *   Esta función recorre toda la tabla de rutas buscando rutas que contengan
+ *   a la dirección RIP indicada. Para ello emplea la función
+ *   'rip_route_lookup()'. De todas las rutas posibles se devuelve aquella
+ *   con el prefijo más específico, esto es, aquella con la máscara de subred
+ *   mayor.
+ * 
+ * PARÁMETROS:
+ *   'table': Tabla de rutas en la que buscar la dirección RIP destino.
+ *    'addr': Dirección RIP destino a buscar.
+ *
+ * VALOR DEVUELTO:
+ *   Esta función devuelve la ruta más específica para llegar a la dirección
+ *   RIP indicada.
+ *
+ * ERRORES:
+ *   Esta función devuelve 'NULL' si no no existe ninguna ruta para alcanzar
+ *   la dirección indicada, o si no ha sido posible realizar la búsqueda.
+ */
+rip_route_t * rip_route_table_lookup ( rip_route_table_t * table, 
+                                         ipv4_addr_t addr )
+{
+	rip_route_t * best_route = NULL;
+	int best_route_prefix = -1;
+
+    while (table != NULL)
+	{
+		rip_route_t * route_i = &(table->data->route);
+	 
+		if (route_i != NULL)
+		{
+			int route_i_lookup = rip_route_lookup(route_i, addr);
+			if (route_i_lookup > best_route_prefix)
+			{
+				best_route = route_i;
+				best_route_prefix = route_i_lookup;
+			}
+		}
+	}
+
+  return best_route;
+}
+
+
+/* void rip_route_table_free ( rip_route_table_t * table );
+ *
+ * DESCRIPCIÓN:
+ *   Esta función libera la memoria reservada para la tabla de rutas
+ *   especificada, incluyendo todas las rutas almacenadas en la misma,
+ *   mediante la función 'rip_route_free()'.
+ *
+ * PARÁMETROS:
+ *   'table': Tabla de rutas a borrar.
+ */
+void rip_route_table_free ( rip_route_table_t * table )
+{
+
+    while (table != NULL)
+	{
+		rip_route_table_t *aux = table;
+		table = table->next;		
+		rip_route_node_free(aux);
+    }
+}
+
+
+/* void rip_route_table_output ( rip_route_table_t * table, FILE * out );
+ *
+ * DESCRIPCIÓN:
+ *   Esta función imprime por la salida indicada la tabla de rutas RIP
+ *   especificada.
+ *
+ * PARÁMETROS:
+ *        'out': Salida por la que imprimir la tabla de rutas.
+ *      'table': Tabla de rutas a imprimir.
+ *
+ * VALOR DEVUELTO:
+ *   La función devuelve el número de rutas impresas por la salida indicada, o
+ *   '0' si la tabla de rutas estaba vacia.
+ *
+ * ERRORES:
+ *   La función devuelve '-1' si se ha producido algún error al escribir por
+ *   la salida indicada.
+ */
+int rip_route_table_output ( FILE * out, rip_route_table_t * table )
+{
+  int err = fprintf
+    (out, "# SubnetAddr  \tSubnetMask    \tNextHop  \tMetric \tElapsedTime\n");
+  if (err < 0) {
+    return -1;
+  }
+  
+  char subnet_str[IPv4_STR_MAX_LENGTH];
+  char mask_str[IPv4_STR_MAX_LENGTH]; 
+  char nexthop_str[IPv4_STR_MAX_LENGTH];
+
+  while(table != NULL)
+  {
+	
+	if (table->data != NULL)
+	{
+      ipv4_addr_str(table->data->route.ip_addr, subnet_str);
+	  ipv4_addr_str(table->data->route.mask, mask_str);
+	  ipv4_addr_str(table->data->route.next_hop, nexthop_str);
+	  uint32_t metric = table->data->route.metric;
+	  uint32_t time = timerms_elapsed(&(table->data->timer));
+
+	  err = fprintf(out, "%-15s\t%-15s\t%-15s\t%d\t%d\n",
+					subnet_str, mask_str, nexthop_str, metric, time/1000);
+      if (err < 0)
+	  {
+        return -1;
+      }
+    }
+
+    table = table->next;
+  }
+
+  return 0;
+}
+
+
+/* void rip_route_table_print ( rip_route_table_t * table );
+ *
+ * DESCRIPCIÓN:
+ *   Esta función imprime por la salida estándar la tabla de rutas RIP
+ *   especificada.
+ *
+ * PARÁMETROS:
+ *      'table': Tabla de rutas a imprimir.
+ */
+void rip_route_table_print ( rip_route_table_t * table )
+{
+  if (table != NULL) {
+    rip_route_table_output (stdout, table);
+  }
+}
+
+void rip_route_node_free(route_node *node)
+{
+	if (node != NULL)
+	{
+		if (node->data != NULL) free(node->data);
+		free(node);
+	}
+}
+
+// void rip_data_free(route_data *data)
+// {
+// 	if (data != NULL)
+// 	{
+// 		if (data->route != NULL) rip_route_free;
+// 		free(data);
+// 	}
+// }
+
+rip_route_table_t * rip_route_update(rip_route_table_t *table, rip_route_t *route)
+{
+	int index = rip_route_table_find(table, route->ip_addr, route->mask);
+	//Comprueba que la ruta tenga parametros correctos, metrica entre 0-16 y ip entre 1-254
+	if(route->metric < 0 || route->metric > 16)
+			//&&
+			//(route->ip_addr[0] <= 1 && route->ip_addr[0] > 254)&&
+			//(route->ip_addr[1] <= 1 && route->ip_addr[1] > 254)&&
+			//(route->ip_addr[2] <= 1 && route->ip_addr[2] > 254)&&
+			//(route->ip_addr[3] <= 1 && route->ip_addr[3] > 254))
+			{
+				return table;
+			}
+	
+	
+	// Si encuentra la ruta la actualiza, si no la a�ade
+	if (index >= 0)
+	{
+		route_data *data = rip_route_table_get(table, index);
+		
+		// Si la metrica de la ruta de la tabla es mayor que la de la recibida
+		// actualiza todo
+		
+		// Si la informacion viene de nuestro next_hope, aunque la info diga que tiene mas metrica hay que actualizarlo.
+		if(memcmp(&(data->route.next_hop),route->next_hop,IPv4_ADDR_SIZE) == 0)
+		{
+		    memcpy(&(data->route.metric), &(route->metric),sizeof(int));
+		}
+		else if (data->route.metric > route->metric) 
+		{
+			memcpy(&(data->route), route, sizeof(struct rip_entry));
+		}
+		
+		// En cualquier caso pone el timer a 0 contando hasta 180 segundos
+		timerms_reset(&(data->timer), INF_TIME*1000);
+		
+	}
+	else if (index == -1) // A�ade la ruta
+	{
+		table = rip_route_table_add(table, route);
+	}
+	
+	return table;
+}
+
+int rip_route_table_size(rip_route_table_t *table)
+{
+	int size = 0;
+	
+	while (table != NULL)
+	{
+		table = table->next;
+		size++;
+	}
+	
+	return size;
+}

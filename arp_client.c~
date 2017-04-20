@@ -1,0 +1,50 @@
+#include "arp.h"
+#include <stdio.h>
+
+int main (int argc, char *argv[])
+{
+	if (argc != 3)
+	{
+		printf("Bad usage: arp_client iface ipaddr\n");
+		exit(-1);
+	}
+	
+	char *ifname = argv[1];
+	
+	ipv4_addr_t ipv4_dst;
+	if (ipv4_str_addr (argv[2], ipv4_dst) == -1)
+	{
+		printf("Invalid IP address\n");
+		exit(-1);
+	}	
+
+	eth_iface_t *iface = eth_open(ifname);
+	
+	if (iface == NULL)
+	{
+		printf("Could not open interface %s\n", ifname);
+		exit(-1);
+	}	
+	
+	mac_addr_t mac_rep;
+	
+	if (arp_resolve(iface, ipv4_dst, mac_rep) == -1)
+	{
+		printf("Could not resolve ARP for host %s\n", argv[2]);
+		exit(-1);
+	}
+	
+	char *mac_str;
+	
+	if (mac_str_addr(mac_str, mac_rep) == -1)
+	{
+		printf("Could not parse MAC address\n");
+		exit(-1);
+	}	
+	
+	printf("\n%s -> %s\n\n", argv[2], mac_str);
+	
+	eth_close(iface);
+	
+	exit(0);
+}

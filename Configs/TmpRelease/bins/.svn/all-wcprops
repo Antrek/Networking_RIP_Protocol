@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/rysca/!svn/ver/165/TmpRelease/bins
+END
+eth_server
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/rysca/!svn/ver/126/TmpRelease/bins/eth_server
+END
+ip_client
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/rysca/!svn/ver/139/TmpRelease/bins/ip_client
+END
+udp_client
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/rysca/!svn/ver/66/TmpRelease/bins/udp_client
+END
+ip_conf.txt
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/rysca/!svn/ver/154/TmpRelease/bins/ip_conf.txt
+END
+ip_route_table.txt
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/rysca/!svn/ver/154/TmpRelease/bins/ip_route_table.txt
+END
+eth_client
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/rysca/!svn/ver/126/TmpRelease/bins/eth_client
+END
+ip_server
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/rysca/!svn/ver/139/TmpRelease/bins/ip_server
+END
+udp_server
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/rysca/!svn/ver/66/TmpRelease/bins/udp_server
+END

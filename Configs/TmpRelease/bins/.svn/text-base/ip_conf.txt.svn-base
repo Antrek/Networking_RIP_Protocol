@@ -1,0 +1,5 @@
+# ipv4_config_client.txt
+#
+Interface wlan0
+IPv4Address 192.168.1.26
+SubnetMask 255.255.255.0

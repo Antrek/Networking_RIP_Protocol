@@ -1,0 +1,65 @@
+#include "rip.h"
+// #include <unistd.h>
+// 
+// #define NUM 11
+// 
+// 
+// 
+// 
+// rip_route_t *crea_ruta(int a,int b,int c, int d,int aa,int bb,int cc,int dd,int metrica)
+// {
+//   ipv4_addr_t ip;
+//   ip[0]= a;
+//   ip[1]= b;
+//   ip[2]= c;
+//   ip[3]= d;
+//   ipv4_addr_t mask;
+//   mask[0] = 255;
+//   mask[1] = 255;
+//   mask[2] = 255;
+//   mask[3] = 0;
+//   ipv4_addr_t n_hop;
+//   n_hop[0]= aa;
+//   n_hop[1]= bb;
+//   n_hop[2]= cc;
+//   n_hop[3]= dd;
+//   int metric = metrica;
+//   return rip_route_create(ip,mask,n_hop,metric);
+// }
+// 
+// 
+int main()
+{
+//   if (rip_open() == -1)
+//   {
+//     puts("error1");
+//     exit(-1);
+//   }
+//   rip_route_table_t *rip_table;
+//   
+//   rip_table = NULL;
+//   rip_route_t *ruta[25];
+// 
+//   int i;
+//   for (i = 0; i < 25; i++)
+//   {
+// 	ruta[i] = crea_ruta(192,168,1,i,192,168,1,i,5);
+// 	rip_table = rip_route_update(rip_table,ruta[i]);
+// 	//sleep(1);
+//   }
+//   
+// //    for (i = 0; i < 25; i++)
+// //   {
+// // 	ruta[i] = crea_ruta(192,168,1,i,192,168,1,i+1,4);
+// // 	rip_table = rip_route_update(rip_table,ruta[i]);
+// //   }
+//   
+// 	ruta[0] = crea_ruta(192,168,1,0,192,168,1,2,6);
+// 		rip_table = rip_route_update(rip_table,ruta[0]);
+// 
+// 
+//   
+//   rip_route_table_output(stdout,rip_table);
+//   
+  return 0; 
+}

@@ -1,0 +1,34 @@
+#ifndef _ARP_CACHE_TABLE_H
+#define _ARP_CACHE_TABLE_H
+
+#include "arp.h"
+#include "ipv4.h"
+
+#include <timerms.h>
+
+#define ARP_MAX_TABLE_SIZE 100
+#define ARP_TIMEOUT 60
+
+
+typedef struct arp_entry 
+{
+	ipv4_addr_t ip_addr;
+	mac_addr_t mac_addr;
+	char iface[6];
+	timerms_t timer;
+} arp_entry_t;
+
+extern arp_entry_t arp_table[ARP_MAX_TABLE_SIZE];
+
+void arp_new_table();
+int arp_table_add(ipv4_addr_t ip_addr, mac_addr_t mac_addr, char *iface);
+int arp_table_remove(ipv4_addr_t ip_addr);
+int arp_table_update(ipv4_addr_t ip_addr, mac_addr_t mac_addr, char *iface);
+arp_entry_t *arp_table_search(ipv4_addr_t ip_addr);
+int arp_table_size();
+void arp_table_timeout();
+int arp_get_empty_position();
+int arp_is_empty(arp_entry_t *entry);
+void arp_table_print();
+
+#endif /* _ARP_CACHE_TABLE_H */

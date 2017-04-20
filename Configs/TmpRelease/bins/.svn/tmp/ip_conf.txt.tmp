@@ -1,0 +1,10 @@
+# ipv4_config_client.txt
+#
+Interface eth0
+<<<<<<< .mine
+IPv4Address 169.254.0.1
+SubnetMask 255.255.0.0
+=======
+IPv4Address 169.254.7.38
+SubnetMask 255.255.0.0
+>>>>>>> .r68

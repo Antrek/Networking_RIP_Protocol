@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/rysca/!svn/ver/8/Sources/ipv4_aux
+END
+ipv4_config_client.txt
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/rysca/!svn/ver/8/Sources/ipv4_aux/ipv4_config_client.txt
+END
+ipv4_route_table_client.txt
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/rysca/!svn/ver/8/Sources/ipv4_aux/ipv4_route_table_client.txt
+END
+ipv4_config.c
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/rysca/!svn/ver/8/Sources/ipv4_aux/ipv4_config.c
+END
+ipv4_route_table.c
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/rysca/!svn/ver/8/Sources/ipv4_aux/ipv4_route_table.c
+END
+ipv4_config_server.txt
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/rysca/!svn/ver/8/Sources/ipv4_aux/ipv4_config_server.txt
+END
+ipv4_route_table_server.txt
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/rysca/!svn/ver/8/Sources/ipv4_aux/ipv4_route_table_server.txt
+END
+ipv4_config.h
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/rysca/!svn/ver/8/Sources/ipv4_aux/ipv4_config.h
+END
+ipv4_route_table.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/rysca/!svn/ver/8/Sources/ipv4_aux/ipv4_route_table.h
+END
